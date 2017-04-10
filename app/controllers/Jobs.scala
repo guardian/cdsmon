@@ -39,7 +39,7 @@ class Jobs @Inject() (configuration: Configuration, db:CdsLogDatabase) extends C
       case Some(joblist:Future[List[CdsJob]])=>
         joblist.map((joblist)=>{
           logger.error(joblist.toString)
-          Ok(joblist.asJson.noSpaces)
+          Ok(joblist.asJson.noSpaces).withHeaders("Content-Type"->"application/json")
         })
       case None=>
         Future(InternalServerError("Nothing returned from database"))

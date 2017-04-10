@@ -58,18 +58,17 @@ class CdsLogDatabase @Inject() (configuration: Configuration) {
 
   def liftJobRecords(connection:Connection, limit:Integer):Future[List[CdsJob]] = Future {
     val stmt = connection.createStatement()
-    logger.error(s"select * from jobs limit $limit")
-    val resultSet = stmt.executeQuery(s"select * from jobs limit $limit")
+    val resultSet = stmt.executeQuery(s"select * from jobs order by created desc limit $limit")
 
-    logger.error(resultSet.toString)
+    logger.debug(resultSet.toString)
 
     def iterateResultList(resultSet:ResultSet,accumulatingList:List[CdsJob]):List[CdsJob] = {
       if(!resultSet.next()) return accumulatingList
       val  parser:DateTimeFormatter   = DateTimeFormat.forPattern("YYYY-MM-DD HH:mm:ss.S")
       val length = accumulatingList.length
 
-      logger.error(s"Iteration $length: $resultSet")
-      logger.error(accumulatingList.toString)
+      logger.debug(s"Iteration $length: $resultSet")
+      logger.debug(accumulatingList.toString)
       //now .next() has been called, ResultSet should be updated...
       iterateResultList(resultSet,
         CdsJob(
@@ -84,7 +83,7 @@ class CdsLogDatabase @Inject() (configuration: Configuration) {
       )
     }
 
-    val rtn = iterateResultList(resultSet,List())
+    val rtn = iterateResultList(resultSet,List()).reverse
     logger.error(s"Final result: $rtn")
     rtn
   }
