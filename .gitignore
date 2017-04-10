@@ -14,4 +14,7 @@ dist
 /RUNNING_PID
 /.settings
 
-    
+
+/frontend/node_modules/
+/public/javascripts/bundle.js
+/node_modules/
