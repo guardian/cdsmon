@@ -56,6 +56,29 @@ class CdsLogDatabase @Inject() (configuration: Configuration) {
     case string:String=>Some(string)
   }
 
+  def liftMetaRecords(connection: Connection, jobId: Integer, limit: Option[Integer]):Future[Map[String,String]] = Future {
+    val stmt = connection.createStatement()
+
+    val limitPart = limit match {
+      case Some(value)=>s" limit $value"
+      case None=>""
+    }
+
+    val resultSet = stmt.executeQuery(s"select * from jobmeta where jobid=$jobId order by identifier asc $limitPart")
+
+    def iterateResultList(resultSet: ResultSet, accumulatingList:Map[String,String]):Map[String,String] = {
+      if(!resultSet.next()) return accumulatingList
+
+      iterateResultList(resultSet,
+        Map(
+          resultSet.getString("identifier")->resultSet.getString("value")
+        ) ++ accumulatingList
+      )
+    }
+
+    iterateResultList(resultSet,Map())
+  }
+
   def liftJobRecords(connection:Connection, limit:Integer):Future[List[CdsJob]] = Future {
     val stmt = connection.createStatement()
     val resultSet = stmt.executeQuery(s"select * from jobs order by created desc limit $limit")
@@ -92,6 +115,14 @@ class CdsLogDatabase @Inject() (configuration: Configuration) {
     getConnection match {
       case Some(connection)=>
         Some(liftJobRecords(connection,limit))
+      case None=>None
+    }
+  }
+
+  def getMeta(jobId:Integer,limit:Option[Integer]):Option[Future[Map[String,String]]] = {
+    getConnection match {
+      case Some(connection)=>
+        Some(liftMetaRecords(connection, jobId, limit))
       case None=>None
     }
   }
