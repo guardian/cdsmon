@@ -64,4 +64,12 @@ class Jobs @Inject() (configuration: Configuration, db:CdsLogDatabase) extends C
     }
   }
 
+  def status(externalId:String) = Action.async {
+    db.getStatus(externalId, None) match {
+      case Some(status)=>
+        status.map((status)=>Ok(status.asJson.noSpaces).withHeaders("Content-Type"->"application/json"))
+      case None=>
+        Future(InternalServerError("Nothing returned from database"))
+    }
+  }
 }

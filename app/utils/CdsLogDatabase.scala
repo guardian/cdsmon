@@ -43,6 +43,7 @@ class CdsLogDatabase @Inject() (configuration: Configuration) {
 
   def touuid(a: Array[Byte]): String =
   {
+    logger.error(s"touuid: value is ${a.toString}")
     val bb   = ByteBuffer.wrap(a)
     val high = bb.getLong()
     val low  = bb.getLong()
@@ -54,6 +55,33 @@ class CdsLogDatabase @Inject() (configuration: Configuration) {
   def optionalString(maybeNull:String): Option[String] = maybeNull match {
     case null=>None
     case string:String=>Some(string)
+  }
+
+  def liftJobStatus(connection:Connection, jobId: String, limit: Option[Integer]):Future[Option[CdsJobStatus]] = Future {
+    val stmt = connection.createStatement()
+
+    val limitPart = limit match {
+      case Some(value)=>s" limit $value"
+      case None=>""
+    }
+
+    val resultSet = stmt.executeQuery(s"select * from jobstatus where job_externalid=bin_from_uuid('$jobId') $limitPart")
+
+    resultSet.next() match {
+      case false=>None
+      case true=>
+        logger.error(resultSet.toString)
+        logger.error(IOUtils.toByteArray(resultSet.getBinaryStream(1)).toString)
+
+        Some(CdsJobStatus(
+          uuidFromStream(resultSet.getBinaryStream(2)),
+          optionalString(resultSet.getString(3)),
+          optionalString(resultSet.getString(4)),
+          optionalString(resultSet.getString(5)),
+          resultSet.getString(6),
+          optionalString(resultSet.getString(7))
+        ))
+    }
   }
 
   def liftJobFiles(connection: Connection, jobId: Integer, limit: Option[Integer]):Future[List[String]] = Future {
@@ -153,6 +181,15 @@ class CdsLogDatabase @Inject() (configuration: Configuration) {
       case Some(connection)=>
         Some(liftJobFiles(connection,jobId,limit))
       case None=>None
+    }
+  }
+
+  def getStatus(externalId: String, limit: Option[Integer]):Option[Future[Option[CdsJobStatus]]] = {
+    getConnection match {
+      case Some(connection)=>
+        Some(liftJobStatus(connection,externalId,limit))
+      case None=>
+        None
     }
   }
 }
