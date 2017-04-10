@@ -6,6 +6,7 @@
 GET     /                           controllers.Application.index
 
 GET     /jobs/*internalid/metadata           @controllers.Jobs.metadata(internalid)
+GET     /jobs/*internalid/files     @controllers.Jobs.files(internalid)
 GET     /jobs                       @controllers.Jobs.list
 
 # Map static resources from the /public folder to the /assets URL path

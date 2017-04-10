@@ -46,12 +46,22 @@ class Jobs @Inject() (configuration: Configuration, db:CdsLogDatabase) extends C
     }
   }
 
-  def metadata(externalId:String) = Action.async {
-    db.getMeta(externalId.toInt,None) match {
+  def metadata(internalId:String) = Action.async {
+    db.getMeta(internalId.toInt,None) match {
       case Some(meta)=>
         meta.map((metaMap)=>Ok(metaMap.asJson.noSpaces).withHeaders("Content-Type"->"application/json"))
       case None=>
         Future(InternalServerError("Nothing returned from database"))
     }
   }
+
+  def files(internalId:String) = Action.async {
+    db.getFiles(internalId.toInt,None) match {
+      case Some(files)=>
+        files.map((filesList)=>Ok(filesList.asJson.noSpaces).withHeaders("Content-Type"->"application/json"))
+      case None=>
+        Future(InternalServerError("Nothing returned from database"))
+    }
+  }
+
 }

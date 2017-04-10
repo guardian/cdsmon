@@ -56,6 +56,27 @@ class CdsLogDatabase @Inject() (configuration: Configuration) {
     case string:String=>Some(string)
   }
 
+  def liftJobFiles(connection: Connection, jobId: Integer, limit: Option[Integer]):Future[List[String]] = Future {
+    val stmt = connection.createStatement()
+
+    val limitPart = limit match {
+      case Some(value)=>s" limit $value"
+      case None=>""
+    }
+
+    val resultSet = stmt.executeQuery(s"select * from jobfiles where jobid=$jobId order by filename asc $limitPart")
+
+    def iterateResultList(resultSet: ResultSet, accumulatingList: List[String]):List[String] = {
+      if(!resultSet.next()) return accumulatingList
+
+      iterateResultList(resultSet,
+        resultSet.getString("filename") :: accumulatingList
+      )
+    }
+
+    iterateResultList(resultSet, List())
+  }
+
   def liftMetaRecords(connection: Connection, jobId: Integer, limit: Option[Integer]):Future[Map[String,String]] = Future {
     val stmt = connection.createStatement()
 
@@ -123,6 +144,14 @@ class CdsLogDatabase @Inject() (configuration: Configuration) {
     getConnection match {
       case Some(connection)=>
         Some(liftMetaRecords(connection, jobId, limit))
+      case None=>None
+    }
+  }
+
+  def getFiles(jobId: Integer, limit:Option[Integer]):Option[Future[List[String]]] = {
+    getConnection match {
+      case Some(connection)=>
+        Some(liftJobFiles(connection,jobId,limit))
       case None=>None
     }
   }
