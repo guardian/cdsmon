@@ -20,7 +20,7 @@ class GenericFilter extends React.Component {
 
     render() {
         return(<select onChange={this.selectorChanged}>
-            {this.state.options.map((opt)=><option name={opt.name}>{opt.label}</option>)}
+            {this.state.options.map((opt)=><option key={opt.name} name={opt.name}>{opt.label}</option>)}
         </select>)
     }
 }

@@ -31,7 +31,7 @@ class OverviewTable extends React.Component {
     }
 
     render(){
-        if(this.state.error) return(<span className="error">{this.state.error}</span>)
+        if(this.state.error) return(<span className="error">{this.state.error}</span>);
 
         return(
             <div>
@@ -58,6 +58,7 @@ class OverviewTable extends React.Component {
                         {
                             this.state.jobsList.map((cdsJobData)=> {
                                     return (<JobComponentView
+                                        key={cdsJobData.internalId}
                                         internalId={cdsJobData.internalId}
                                         externalId={cdsJobData.externalId}
                                         created={cdsJobData.created}
