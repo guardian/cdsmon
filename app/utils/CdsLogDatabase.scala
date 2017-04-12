@@ -35,10 +35,9 @@ class CdsLogDatabase @Inject() (configuration: Configuration) {
       )
       )
     } catch {
-      case e:Exception=>{
+      case e:Exception=>
         logger.error(e.getMessage)
         None
-      }
     }
 
   def touuid(a: Array[Byte]): String =
@@ -84,7 +83,13 @@ class CdsLogDatabase @Inject() (configuration: Configuration) {
     }
   }
 
-  def liftJobFiles(connection: Connection, jobId: Integer, limit: Option[Integer]):Future[List[String]] = Future {
+  def liftJobFiles(connection: Connection, jobId: Integer, limit: Option[Integer]) =
+    liftStringList(connection,s"select * from jobfiles where jobid=$jobId order by filename asc", "filename", limit)
+
+  def liftRouteNames(connection: Connection, limit: Option[Integer]) =
+    liftStringList(connection,s"select distinct routename from jobs", "routename", limit)
+
+  def liftStringList(connection: Connection, sql: String, dbKey: String, limit: Option[Integer]):Future[List[String]] = Future {
     val stmt = connection.createStatement()
 
     val limitPart = limit match {
@@ -92,13 +97,13 @@ class CdsLogDatabase @Inject() (configuration: Configuration) {
       case None=>""
     }
 
-    val resultSet = stmt.executeQuery(s"select * from jobfiles where jobid=$jobId order by filename asc $limitPart")
+    val resultSet = stmt.executeQuery(sql + limitPart)
 
     def iterateResultList(resultSet: ResultSet, accumulatingList: List[String]):List[String] = {
       if(!resultSet.next()) return accumulatingList
 
       iterateResultList(resultSet,
-        resultSet.getString("filename") :: accumulatingList
+        resultSet.getString(dbKey) :: accumulatingList
       )
     }
 
@@ -190,6 +195,13 @@ class CdsLogDatabase @Inject() (configuration: Configuration) {
         Some(liftJobStatus(connection,externalId,limit))
       case None=>
         None
+    }
+  }
+
+  def getRouteList(limit: Option[Integer]):Option[Future[List[String]]] = {
+    getConnection match {
+      case Some(connection)=> Some(liftRouteNames(connection, limit))
+      case None=>None
     }
   }
 }

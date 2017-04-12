@@ -30,6 +30,10 @@ class OverviewTable extends React.Component {
 
     }
 
+    statusFilterChanged(newstatus){
+
+    }
+
     render(){
         if(this.state.error) return(<span className="error">{this.state.error}</span>);
 
@@ -37,12 +41,12 @@ class OverviewTable extends React.Component {
             <div>
                 <div id="filterbar">
                     <RouteNamesFilter routeNames={this.state.routeNames} onChanged={this.nameFilterChanged}/>
-                    <RouteStatusFilter/>
+                    <RouteStatusFilter onChanged={this.statusFilterChanged}/>
                 </div>
                 <div id="content">
                     <table className="dashboardpanel">
                         <thead>
-                        <tr>
+                        <tr className="dashboardheader">
                             <td>Route & Start time</td>
                             <td>Status</td>
                             <td>Current Operation</td>

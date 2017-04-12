@@ -2,7 +2,7 @@ package controllers
 
 import play.api.Configuration
 import play.api.mvc._
-import com.google.inject.Inject
+import com.google.inject.{Inject,Singleton}
 import models.{CdsJob, CdsModel}
 import org.joda.time.DateTime
 import io.circe._
@@ -18,6 +18,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 /**
   * Created by localhome on 10/04/2017.
   */
+@Singleton
 class Jobs @Inject() (configuration: Configuration, db:CdsLogDatabase) extends Controller {
   //implicit val CdsJobEncoder:Encoder[CdsJob] = Encoder[CdsJob]
   private final val logger = Logger.of(this.getClass)
@@ -68,6 +69,20 @@ class Jobs @Inject() (configuration: Configuration, db:CdsLogDatabase) extends C
     db.getStatus(externalId, None) match {
       case Some(status)=>
         status.map((status)=>Ok(status.asJson.noSpaces).withHeaders("Content-Type"->"application/json"))
+      case None=>
+        Future(InternalServerError("Nothing returned from database"))
+    }
+  }
+
+  def routeNames() = Action.async {
+    db.getRouteList(None) match {
+      case Some(routeList)=>
+        routeList.map(
+          (routes)=>{
+            val processed = routes.map((fileName)=>fileName.split("/").last)
+            Ok(processed.asJson.noSpaces).withHeaders("Content-Type"->"application/json")
+          }
+        )
       case None=>
         Future(InternalServerError("Nothing returned from database"))
     }

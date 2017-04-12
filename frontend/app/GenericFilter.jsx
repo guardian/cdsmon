@@ -5,7 +5,10 @@ class GenericFilter extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            options: []
+            options: [],
+            label: "",
+            jsid: "",
+            labelClass: "filter_label"
         };
         this.selectorChanged = this.selectorChanged.bind(this);
     }
@@ -19,9 +22,12 @@ class GenericFilter extends React.Component {
     }
 
     render() {
-        return(<select onChange={this.selectorChanged}>
-            {this.state.options.map((opt)=><option key={opt.name} name={opt.name}>{opt.label}</option>)}
-        </select>)
+        return(<span className="dashboard_component">
+            <label htmlFor={this.state.jsid} className={this.state.labelClass}>{this.state.label}</label>
+                <select id={this.state.jsid} onChange={this.selectorChanged}>
+                    {this.state.options.map((opt)=><option key={opt.name} name={opt.name}>{opt.label}</option>)}
+                </select>
+            </span>)
     }
 }
 

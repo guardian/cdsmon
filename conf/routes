@@ -2,12 +2,13 @@
 # This file defines all application routes (Higher priority routes first)
 # ~~~~
 
-# Home page
+# Job API
 GET     /jobs/*internalid/metadata           @controllers.Jobs.metadata(internalid)
 GET     /jobs/*internalid/files     @controllers.Jobs.files(internalid)
 GET     /jobs/*externalid/status    @controllers.Jobs.status(externalid)
-
 GET     /jobs                       @controllers.Jobs.list
+
+GET     /routenames                 @controllers.Jobs.routeNames()
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)

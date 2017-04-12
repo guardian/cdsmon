@@ -2,11 +2,7 @@ import React from 'react';
 import {render} from 'react-dom';
 import GenericFilter from './GenericFilter.jsx';
 
-class RouteNamesFilter extends GenericFilter {
-    constructor(props) {
-        super(props);
-    }
-
+class RouteStatusFilter extends GenericFilter {
     componentWillMount() {
         this.setState({
             options: [
@@ -15,9 +11,11 @@ class RouteNamesFilter extends GenericFilter {
                 {name: "processing", label: "Processing"},
                 {name: "success", label: "Success"},
                 {name: "error", label: "Error"}
-            ]
+            ],
+            label: "Job Status",
+            jsid: "id_job_status"
         })
     }
 }
 
-export default RouteNamesFilter;
+export default RouteStatusFilter;

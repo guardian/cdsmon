@@ -54,25 +54,30 @@ class JobComponentView extends React.Component {
                 <span style={ {fontSize: "0.6em"}}>{this.dateFormatter(this.props.created)}</span>
             </td>
             <td>
-                {this.statusFormatter(this.state.routeStatus)}
+                {this.statusFormatter(this.state.jobStatus.routeStatus)}
             </td>
             <td>
-                {this.state.currentOperation}
+                {this.state.jobStatus.currentOperation}
             </td>
             <td>
-                {this.state.lastOperation}
+                {this.state.jobStatus.lastOperation}
             </td>
             <td>
-                {this.statusFormatter(this.state.lastOperationStatus)}
+                {this.statusFormatter(this.state.jobStatus.lastOperationStatus)}
             </td>
             <td>
-
+                <ul className="file_list">
+                {
+                    this.state.jobFiles.map((fileName)=><li key={fileName}>{fileName}</li>)
+                }
+                </ul>
             </td>
             <td>
-                {this.state.lastError}
+                {this.state.jobStatus.lastError}
             </td>
             <td>
-
+                <span style={{fontSize: "1em"}}>{this.props.hostname}</span><br/>
+                <span style={{fontSize: "0.7em"}}>{this.props.hostip}</span><br/>
             </td>
         </tr>)
     }
