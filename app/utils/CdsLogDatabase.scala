@@ -1,6 +1,6 @@
 package utils
 
-import java.io.InputStream
+import java.io.{ByteArrayInputStream, ByteArrayOutputStream, InputStream}
 import java.nio.ByteBuffer
 
 import models._
@@ -49,6 +49,19 @@ class CdsLogDatabase @Inject() (configuration: Configuration) {
   }
 
   def uuidFromStream(strm: InputStream) = touuid(IOUtils.toByteArray(strm))
+
+  def fromuuid(a: UUID):Array[Byte] = {
+    val bb = ByteBuffer.allocate(128)
+    val high = a.getMostSignificantBits
+    val low= a.getLeastSignificantBits
+    bb.putLong(low)
+    bb.putLong(high)
+    bb.array()
+  }
+
+  def uuidToStream(a:UUID) = {
+    new ByteArrayInputStream(fromuuid(a))
+  }
 
   def optionalString(maybeNull:String): Option[String] = maybeNull match {
     case null=>None
@@ -129,6 +142,33 @@ class CdsLogDatabase @Inject() (configuration: Configuration) {
     iterateResultList(resultSet,Map())
   }
 
+  def liftLogContent(connection: Connection, externalId: UUID,startAt: Int, pageSize: Int) = Future {
+    val stmt = connection.prepareStatement(s"select * from log where externalid=bin_from_uuid(?) limit ? offset ?")
+    //stmt.setBlob(1,uuidToStream(externalId))
+    stmt.setString(1,externalId.toString)
+    stmt.setInt(2, pageSize)
+    stmt.setInt(3, startAt)
+
+    val resultSet = stmt.executeQuery()
+    def iterateResultList(resultSet: ResultSet,accumulatingList:List[LogEntry]):List[LogEntry] = {
+      if(!resultSet.next()) return accumulatingList
+      val parser:DateTimeFormatter = DateTimeFormat.forPattern("YYYY-MM-dd HH:mm:ss.S")
+
+      logger.error(resultSet.getString(4))
+      iterateResultList(resultSet,
+        LogEntry(
+          resultSet.getInt(1),
+          resultSet.getInt(3).toString,
+          resultSet.getString(4),
+          resultSet.getString(5),
+          parser.parseDateTime(resultSet.getString(6))
+        ) :: accumulatingList
+      )
+    }
+
+    iterateResultList(resultSet, List()).reverse
+  }
+
   def liftJobRecords(connection:Connection, limit:Integer, routeFilter:Option[String],statusFilter:Option[String]):Future[List[CdsJob]] = Future {
     val stmt = connection.createStatement()
     val whereClausePieces:List[String] = List(routeFilter.map((n)=>{s"routename REGEXP \'/$n-{0,1}[0-9]*\'"}),
@@ -152,10 +192,7 @@ class CdsLogDatabase @Inject() (configuration: Configuration) {
       val  parser:DateTimeFormatter   = DateTimeFormat.forPattern("YYYY-MM-dd HH:mm:ss.S")
       val length = accumulatingList.length
 
-      logger.debug(s"Iteration $length: $resultSet")
-      logger.debug(accumulatingList.toString)
       //now .next() has been called, ResultSet should be updated...
-      logger.error(s"Date string is ${resultSet.getString(3)}")
       iterateResultList(resultSet,
         CdsJob(
           resultSet.getInt(1),
@@ -209,6 +246,13 @@ class CdsLogDatabase @Inject() (configuration: Configuration) {
   def getRouteList(limit: Option[Integer]):Option[Future[List[String]]] = {
     getConnection match {
       case Some(connection)=> Some(liftRouteNames(connection, limit))
+      case None=>None
+    }
+  }
+
+  def getLog(externalId:UUID,startAt:Int, pageSize:Int):Option[Future[List[LogEntry]]] = {
+    getConnection match {
+      case Some(connection)=>Some(liftLogContent(connection, externalId,startAt,pageSize))
       case None=>None
     }
   }

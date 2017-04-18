@@ -12,7 +12,6 @@ import io.circe.syntax._
 import org.joda.time.format.ISODateTimeFormat
 import play.Logger
 import utils.CdsLogDatabase
-
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 /**

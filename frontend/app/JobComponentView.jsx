@@ -17,8 +17,14 @@ class JobComponentView extends React.Component {
                 lastOperationStatus: holdingString,
                 routeStatus:holdingString
             },
-            jobFiles: []
+            jobFiles: [],
+            hovered: false
         };
+        this.rowClicked = this.rowClicked.bind(this);
+    }
+
+    rowClicked() {
+        window.location = "/log/" + this.props.externalId;
     }
 
     componentWillMount() {
@@ -48,7 +54,7 @@ class JobComponentView extends React.Component {
     }
 
     render() {
-        return(<tr>
+        return(<tr className="selectable" onClick={this.rowClicked}>
             <td>
                 <span style={ {fontSize: "1em"}}>{this.props.routeName}</span><br/>
                 <span style={ {fontSize: "0.6em"}}>{this.dateFormatter(this.props.created)}</span>
