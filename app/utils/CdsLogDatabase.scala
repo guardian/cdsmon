@@ -42,7 +42,6 @@ class CdsLogDatabase @Inject() (configuration: Configuration) {
 
   def touuid(a: Array[Byte]): String =
   {
-    logger.error(s"touuid: value is ${a.toString}")
     val bb   = ByteBuffer.wrap(a)
     val high = bb.getLong()
     val low  = bb.getLong()
@@ -69,9 +68,6 @@ class CdsLogDatabase @Inject() (configuration: Configuration) {
     resultSet.next() match {
       case false=>None
       case true=>
-        logger.error(resultSet.toString)
-        logger.error(IOUtils.toByteArray(resultSet.getBinaryStream(1)).toString)
-
         Some(CdsJobStatus(
           uuidFromStream(resultSet.getBinaryStream(2)),
           optionalString(resultSet.getString(3)),
@@ -141,12 +137,13 @@ class CdsLogDatabase @Inject() (configuration: Configuration) {
 
     def iterateResultList(resultSet:ResultSet,accumulatingList:List[CdsJob]):List[CdsJob] = {
       if(!resultSet.next()) return accumulatingList
-      val  parser:DateTimeFormatter   = DateTimeFormat.forPattern("YYYY-MM-DD HH:mm:ss.S")
+      val  parser:DateTimeFormatter   = DateTimeFormat.forPattern("YYYY-MM-dd HH:mm:ss.S")
       val length = accumulatingList.length
 
       logger.debug(s"Iteration $length: $resultSet")
       logger.debug(accumulatingList.toString)
       //now .next() has been called, ResultSet should be updated...
+      logger.error(s"Date string is ${resultSet.getString(3)}")
       iterateResultList(resultSet,
         CdsJob(
           resultSet.getInt(1),
@@ -161,7 +158,6 @@ class CdsLogDatabase @Inject() (configuration: Configuration) {
     }
 
     val rtn = iterateResultList(resultSet,List()).reverse
-    logger.error(s"Final result: $rtn")
     rtn
   }
 

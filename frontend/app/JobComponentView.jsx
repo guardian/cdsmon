@@ -6,7 +6,7 @@ import strftime from 'strftime';
 class JobComponentView extends React.Component {
     constructor(props) {
         super(props);
-        const holdingString="(loading)"
+        const holdingString="(loading)";
         this.state = {
             error: null,
             jobStatus: {
@@ -40,7 +40,7 @@ class JobComponentView extends React.Component {
     }
 
     dateFormatter(datetime){
-        return strftime("%u %b %o %H:%M:%S %Y", new Date(datetime))
+        return strftime("%a %b %o %H:%M:%S %Y", new Date(datetime))
     }
 
     statusFormatter(status){
