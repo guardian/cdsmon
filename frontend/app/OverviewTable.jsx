@@ -20,10 +20,28 @@ class OverviewTable extends React.Component {
     componentWillMount(){
         axios.get('/jobs').then((response)=>{
             this.setState({jobsList: response.data})
-        }).catch((error)=> {
-            console.error(error);
-            this.setState({error: error.toString});
-        })
+        }).catch(function(error){
+            console.error("Got error in request to /jobs");
+            if (error.response) {
+                console.log("error came from server: ");
+                console.log(error.response);
+                console.log(this);
+                // The request was made and the server responded with a status code
+                // that falls out of the range of 2xx
+                this.setState({error: error.response});
+            } else if (error.request) {
+                // The request was made but no response was received
+                // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
+                // http.ClientRequest in node.js
+                console.error(error.request);
+                this.setState({error: {data: "No response received from server"}});
+            } else {
+                // Something happened in setting up the request that triggered an Error
+                this.setState({error: {data: "Clientside error: " + error.message}});
+                console.error('Error', error.message);
+            }
+            console.error(error.config);
+        }.bind(this));
     }
 
     nameFilterChanged(newname){
@@ -35,7 +53,7 @@ class OverviewTable extends React.Component {
     }
 
     render(){
-        if(this.state.error) return(<span className="error">{this.state.error}</span>);
+        if(this.state.error) return(<span className="error">{this.state.error.data}</span>);
 
         return(
             <div>
