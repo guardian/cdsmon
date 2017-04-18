@@ -8,7 +8,7 @@ class RouteStatusFilter extends GenericFilter {
             options: [
                 {name: "*", label: "(all)"},
                 {name: "parsing", label: "Parsing"},
-                {name: "processing", label: "Processing"},
+                {name: "process", label: "Processing"},
                 {name: "success", label: "Success"},
                 {name: "error", label: "Error"}
             ],

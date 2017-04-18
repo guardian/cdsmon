@@ -12,13 +12,37 @@ class OverviewTable extends React.Component {
         this.state = {
             'error': null,
             'jobsList': [],
-            'routeNames': []
+            'routeNames': [],
+            'nameFilter': null,
+            'statusFilter': null
         };
         this.nameFilterChanged = this.nameFilterChanged.bind(this);
+        this.statusFilterChanged = this.statusFilterChanged.bind(this);
     }
 
-    componentWillMount(){
-        axios.get('/jobs').then((response)=>{
+    requestUrl(){
+        let urlparts = [];
+        if(this.state.nameFilter){
+            urlparts.push("routename=" + this.state.nameFilter);
+        }
+        if(this.state.statusFilter){
+            urlparts.push("status=" + this.state.statusFilter);
+        }
+        if(urlparts.length>0) return "/jobs?" + urlparts.join("&");
+        return "/jobs";
+    }
+
+    componentWillMount() {
+        this.loadData();
+    }
+
+    componentDidUpdate(nextProps,nextState) {
+        console.log(nextState);
+        if(nextState.nameFilter!=this.state.nameFilter || nextState.statusFilter !=this.state.statusFilter) this.loadData();
+    }
+
+    loadData() {
+        axios.get(this.requestUrl()).then((response)=>{
             this.setState({jobsList: response.data})
         }).catch(function(error){
             console.error("Got error in request to /jobs");
@@ -45,11 +69,21 @@ class OverviewTable extends React.Component {
     }
 
     nameFilterChanged(newname){
-
+        console.log("Name filter changed to " + newname);
+        if(newname=="(all)"){
+            this.setState({nameFilter: null});
+        } else {
+            this.setState({nameFilter: newname});
+        }
     }
 
     statusFilterChanged(newstatus){
-
+        console.log("Status filter changed to "+newstatus);
+        if(newstatus=="(all)"){
+            this.setState({statusFilter: null});
+        } else {
+            this.setState({statusFilter: newstatus});
+        }
     }
 
     render(){
