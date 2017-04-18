@@ -129,9 +129,19 @@ class CdsLogDatabase @Inject() (configuration: Configuration) {
     iterateResultList(resultSet,Map())
   }
 
-  def liftJobRecords(connection:Connection, limit:Integer):Future[List[CdsJob]] = Future {
+  def liftJobRecords(connection:Connection, limit:Integer, routeFilter:Option[String],statusFilter:Option[String]):Future[List[CdsJob]] = Future {
     val stmt = connection.createStatement()
-    val resultSet = stmt.executeQuery(s"select * from jobs order by created desc limit $limit")
+    val whereClausePieces:List[String] = List(routeFilter.map((n)=>{s"routename REGEXP \'/$n-{0,1}[0-9]*\'"}),
+                                 statusFilter.map((s)=>{s"status=\'$s\'"})
+                                ).filter(_.isDefined).map(_.get)
+
+    val whereClause = if(whereClausePieces.nonEmpty){
+      "where " + whereClausePieces.mkString(" and ")
+    } else {
+      ""
+    }
+
+    val resultSet = stmt.executeQuery(s"select * from jobs $whereClause order by created desc limit $limit")
 
     logger.debug(resultSet.toString)
 
@@ -161,10 +171,10 @@ class CdsLogDatabase @Inject() (configuration: Configuration) {
     rtn
   }
 
-  def listJobs(limit:Integer):Option[Future[List[CdsJob]]] = {
+  def listJobs(limit:Integer,routeFilter:Option[String],statusFilter:Option[String]):Option[Future[List[CdsJob]]] = {
     getConnection match {
       case Some(connection)=>
-        Some(liftJobRecords(connection,limit))
+        Some(liftJobRecords(connection,limit,routeFilter,statusFilter))
       case None=>None
     }
   }

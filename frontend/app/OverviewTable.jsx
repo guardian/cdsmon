@@ -23,10 +23,10 @@ class OverviewTable extends React.Component {
     requestUrl(){
         let urlparts = [];
         if(this.state.nameFilter){
-            urlparts.push("routename=" + this.state.nameFilter);
+            urlparts.push("routeFilter=" + this.state.nameFilter);
         }
         if(this.state.statusFilter){
-            urlparts.push("status=" + this.state.statusFilter);
+            urlparts.push("statusFilter=" + this.state.statusFilter);
         }
         if(urlparts.length>0) return "/jobs?" + urlparts.join("&");
         return "/jobs";

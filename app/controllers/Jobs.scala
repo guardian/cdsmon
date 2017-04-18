@@ -35,8 +35,8 @@ class Jobs @Inject() (configuration: Configuration, db:CdsLogDatabase) extends C
     )
   }
 
-  def list = Action.async {
-    db.listJobs(10) match {
+  def list(routeFilter: Option[String],statusFilter: Option[String]) = Action.async {
+    db.listJobs(10,routeFilter,statusFilter) match {
       case Some(joblist:Future[List[CdsJob]])=>
         joblist.map((joblist)=>{
           logger.error(joblist.toString)
@@ -79,7 +79,20 @@ class Jobs @Inject() (configuration: Configuration, db:CdsLogDatabase) extends C
       case Some(routeList)=>
         routeList.map(
           (routes)=>{
-            val processed = routes.map((fileName)=>fileName.split("/").last)
+            //a route is often recorded with a full path, i.e., /etc/cds_backend/routes/routename-nnnn.xml.
+            //we are only interested in the routename- bit.
+            val routeXtractor = "(.*)-\\d+\\.[^\\/]+$".r
+            val processed = routes.map(
+              (filePath)=>{
+                val fileName = filePath.split("/").last
+                try {
+                  val routeXtractor(baseName) = fileName
+                  baseName
+                } catch {
+                  case e:scala.MatchError=>fileName
+                }
+              }
+            )
             Ok(processed.asJson.noSpaces).withHeaders("Content-Type"->"application/json")
           }
         )
