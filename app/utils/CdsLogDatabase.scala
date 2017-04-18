@@ -158,7 +158,7 @@ class CdsLogDatabase @Inject() (configuration: Configuration) {
       iterateResultList(resultSet,
         LogEntry(
           resultSet.getInt(1),
-          resultSet.getInt(3).toString,
+          resultSet.getInt(3),
           resultSet.getString(4),
           resultSet.getString(5),
           parser.parseDateTime(resultSet.getString(6))
