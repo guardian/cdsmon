@@ -92,7 +92,7 @@ class Jobs @Inject() (configuration: Configuration, db:CdsLogDatabase) extends C
                   case e:scala.MatchError=>fileName
                 }
               }
-            )
+            ).distinct
             Ok(processed.asJson.noSpaces).withHeaders("Content-Type"->"application/json")
           }
         )

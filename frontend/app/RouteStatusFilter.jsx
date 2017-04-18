@@ -6,7 +6,7 @@ class RouteStatusFilter extends GenericFilter {
     componentWillMount() {
         this.setState({
             options: [
-                {name: "*", label: "(all)"},
+                {name: "(all)", label: "(all)"},
                 {name: "parsing", label: "Parsing"},
                 {name: "process", label: "Processing"},
                 {name: "success", label: "Success"},

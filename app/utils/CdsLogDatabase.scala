@@ -132,8 +132,8 @@ class CdsLogDatabase @Inject() (configuration: Configuration) {
   def liftJobRecords(connection:Connection, limit:Integer, routeFilter:Option[String],statusFilter:Option[String]):Future[List[CdsJob]] = Future {
     val stmt = connection.createStatement()
     val whereClausePieces:List[String] = List(routeFilter.map((n)=>{s"routename REGEXP \'/$n-{0,1}[0-9]*\'"}),
-                                 statusFilter.map((s)=>{s"status=\'$s\'"})
-                                ).filter(_.isDefined).map(_.get)
+                                              statusFilter.map((s)=>{s"route_status=\'${s.toLowerCase}\'"})
+                                             ).filter(_.isDefined).map(_.get)
 
     val whereClause = if(whereClausePieces.nonEmpty){
       "where " + whereClausePieces.mkString(" and ")
@@ -141,7 +141,9 @@ class CdsLogDatabase @Inject() (configuration: Configuration) {
       ""
     }
 
-    val resultSet = stmt.executeQuery(s"select * from jobs $whereClause order by created desc limit $limit")
+    val fields = List("internalid","externalid","created","routename","status","hostname","hostip")
+    val fieldlist = fields.mkString(",")
+    val resultSet = stmt.executeQuery(s"select $fieldlist from jobs left join jobstatus on externalid=job_externalid $whereClause group by internalid order by created desc limit $limit")
 
     logger.debug(resultSet.toString)
 

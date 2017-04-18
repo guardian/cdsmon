@@ -9,16 +9,13 @@ class RouteNamesFilter extends GenericFilter {
             label: "Route Name",
             jsid: "id_routename_filter"
         });
-        /*
-         options: [
-         {name: "test_entry", label: "Test Entry"}
-         ],
-         */
+
         axios.get("/routenames").then((response)=>
             this.setState({
-                options: response.data.map((entry)=>{
-                    return {name: entry, label: entry}
-                })
+                options:
+                    [{name: "(all)", label: "(all)"}].concat(response.data.map(
+                        (entry)=>{return {name: entry, label: entry}})
+                    )
             })
         ).catch((error)=>console.error(error))
     }
