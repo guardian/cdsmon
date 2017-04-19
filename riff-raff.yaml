@@ -1,0 +1,8 @@
+regions: [eu-west-1]
+stacks: [multimedia]
+
+deployments:
+  cds-logging:
+    type: autoscaling
+    parameters:
+      bucket: gnm-multimedia-rr-deployables
