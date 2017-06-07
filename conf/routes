@@ -2,8 +2,13 @@
 # This file defines all application routes (Higher priority routes first)
 # ~~~~
 
+#Login stuff
+POST    /oauthCallback             controllers.Login.oauthCallback
+GET     /logout                    controllers.Login.logout
+GET     /loginstatus               controllers.Login.loginStatus
+
 # Job API
-GET     /jobs/:internalid/metadata           @controllers.Jobs.metadata(internalid)
+GET     /jobs/:internalid/metadata  @controllers.Jobs.metadata(internalid)
 GET     /jobs/:internalid/files     @controllers.Jobs.files(internalid)
 GET     /jobs/:externalid/status    @controllers.Jobs.status(externalid)
 GET     /jobs                       @controllers.Jobs.list(routeFilter: Option[String],statusFilter: Option[String])

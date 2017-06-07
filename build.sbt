@@ -23,6 +23,12 @@ libraryDependencies ++= Seq(
 // https://mvnrepository.com/artifact/commons-io/commons-io
 libraryDependencies += "commons-io" % "commons-io" % "2.5"
 
+libraryDependencies += "com.gu" %% "pan-domain-auth-core" % "0.3.0"
+
+// https://mvnrepository.com/artifact/com.gu/pan-domain-auth-play_2.11
+libraryDependencies += "com.gu" % "pan-domain-auth-play_2.11" % "0.2.13"
+
+
 import com.typesafe.sbt.packager.archetypes.ServerLoader.Systemd
 serverLoading in Debian := Systemd
 
@@ -45,9 +51,6 @@ lazy val `cdsmon` = (project in file(".")).enablePlugins(PlayScala, RiffRaffArti
     packageSummary := "CDSMonitor (aka cds-logging)",
     packageDescription := """Simple monitoring interface for the Content Delivery System""",
 
-//    riffRaffArtifactResources ++= Seq(
-//      baseDirectory.value / "cloudformation" / "AtomWorkshop.yml" -> s"packages/cloudformation/AtomWorkshop.yml"
-//    ),
     javaOptions in Universal ++= Seq(
       "-Dpidfile.path=/dev/null"
     )

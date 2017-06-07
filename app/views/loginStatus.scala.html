@@ -1,0 +1,17 @@
+@(userinfo:String)
+
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <title>User information</title>
+        <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/main.css")">
+        <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/dashboard.css")">
+        <link rel="shortcut icon" type="image/png" href="@routes.Assets.at("images/favicon.png")">
+    </head>
+    <body>
+        <pre>
+            @userinfo
+        </pre>
+    </body>
+</html>
