@@ -21,10 +21,16 @@ dependencies:
     - npm install
     - sbt test:compile
 
+database:
+  override:
+    - echo "create user 'cdslogger'@'localhost' identified by 'f5FCEF7emfUCaHRn'; create database cloudcdslog; grant all on cloudcdslog.* to cdslogger;" | mysql -u ubuntu
+    - mysql -u ubuntu cloudcdslog < setup/test_sql_data.sql
+
 test:
   override:
-    - sbt test
     - npm run test
+    - npm run build
+    - sbt test
 
 deployment:
   riffraff_upload:

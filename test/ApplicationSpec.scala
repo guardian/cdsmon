@@ -15,16 +15,22 @@ class ApplicationSpec extends Specification {
 
   "Application" should {
 
-    "send 404 on a bad request" in new WithApplication{
-      route(FakeRequest(GET, "/boum")) must beNone
-    }
-
     "render the index page" in new WithApplication{
       val home = route(FakeRequest(GET, "/")).get
 
       status(home) must equalTo(OK)
       contentType(home) must beSome.which(_ == "text/html")
-      contentAsString(home) must contain ("Your new application is ready.")
+      contentAsString(home) must contain ("<title>CDS Monitor</title>")
+      contentAsString(home) must contain ("<script src=\"/assets/javascripts/bundle.js\"></script>")
+    }
+
+    "return json of route names" in new WithApplication {
+      val content = route(FakeRequest(GET,"/routenames")).get
+
+      status(content) must equalTo(OK)
+      contentType(content) must beSome.which(_ == "application/json")
+      println(contentAsString(content))
+      contentAsString(content) must contain ("\"Interactive_Transcoding_Workflow_Route\",\"DR_site_HLS\"")
     }
   }
 }
