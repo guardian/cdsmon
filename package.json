@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "dev": "webpack -d --watch",
-    "build": "webpack -p"
+    "build": "webpack -p",
+    "test": "JEST_JUNIT_OUTPUT=${CIRCLE_TEST_REPORTS}/jest-gnmawsgr/gnmawsgr-junit.xml jest --runInBand"
   },
   "author": "Andy Gallagher <andy.gallagher@theguardian.com>",
   "license": "ISC",
@@ -24,6 +25,11 @@
     "webpack": "^2.3.3"
   },
   "devDependencies": {
+    "enzyme": "^2.8.2",
+    "jest": "^20.0.4",
+    "jest-junit": "^1.5.1",
+    "moxios": "^0.4.0",
+    "react-test-renderer": "^15.5.4",
     "sinon": "^2.3.2"
   }
 }

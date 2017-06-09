@@ -44,6 +44,16 @@ class CdsLogDatabaseSpec (implicit ee: ExecutionEnv) extends Specification {
       } await(1,2.seconds)
     }
 
+    "lift job status" in new WithApplication {
+      val db = new CdsLogDatabase(app.configuration)
+      val testid = "cc0f6235-2b5a-4322-af29-bd66c12ec96b"
 
+      val resultFuture = db.liftJobStatus(db.getConnection.get, testid, None)
+      resultFuture.map { result=>
+        val content = result.get
+
+        content.routeStatus must be equalTo "something"
+      } await(1,2.seconds)
+    }
   }
 }
