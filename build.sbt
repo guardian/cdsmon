@@ -8,7 +8,7 @@ version := "1.0"
 
 scalaVersion := "2.12.8"
 
-libraryDependencies ++= Seq( jdbc , cache , ws   , specs2 % Test )
+libraryDependencies ++= Seq( jdbc  , ws , guice , specs2 % Test )
 
 resolvers += "scalaz-bintray" at "https://dl.bintray.com/scalaz/releases"
 
