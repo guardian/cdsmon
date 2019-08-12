@@ -2,7 +2,7 @@ package controllers
 
 import play.api.Configuration
 import play.api.mvc._
-import com.google.inject.{Inject,Singleton}
+import javax.inject.{Inject,Singleton}
 import models.LogEntry
 import org.joda.time.DateTime
 import io.circe._
@@ -21,7 +21,7 @@ import utils.CdsLogDatabase
   * Created by localhome on 18/04/2017.
   */
 @Singleton
-class LogApi @Inject() (configuration: Configuration, db:CdsLogDatabase) extends Controller {
+class LogApi @Inject() (configuration: Configuration, db:CdsLogDatabase,cc:ControllerComponents) extends AbstractController(cc) {
   private final val logger = Logger.of(this.getClass)
 
   implicit val LogEntryEncoder:Encoder[LogEntry] = Encoder.instance {

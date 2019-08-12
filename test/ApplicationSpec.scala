@@ -16,7 +16,9 @@ class ApplicationSpec extends Specification {
   "Application" should {
 
     "render the index page" in new WithApplication{
-      val home = route(FakeRequest(GET, "/")).get
+      val r = FakeRequest(GET,"/")
+
+      val home = route(app,r).get
 
       status(home) must equalTo(OK)
       contentType(home) must beSome.which(_ == "text/html")
@@ -25,7 +27,7 @@ class ApplicationSpec extends Specification {
     }
 
     "return json of route names" in new WithApplication {
-      val content = route(FakeRequest(GET,"/routenames")).get
+      val content = route(app, FakeRequest(GET,"/routenames")).get
 
       status(content) must equalTo(OK)
       contentType(content) must beSome.which(_ == "application/json")

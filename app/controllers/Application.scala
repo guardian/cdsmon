@@ -1,9 +1,9 @@
 package controllers
 
-import play.api._
+import javax.inject.Inject
 import play.api.mvc._
 
-object Application extends Controller {
+class Application @Inject() (cc:ControllerComponents) extends AbstractController(cc) {
   def mainview(path:String) = Action {
     Ok(views.html.main("CDS Monitor"))
   }

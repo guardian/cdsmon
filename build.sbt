@@ -1,8 +1,12 @@
+import com.typesafe.sbt.packager.docker
+import com.typesafe.sbt.packager.docker.DockerPlugin.autoImport.{dockerExposedPorts, dockerPermissionStrategy, dockerUsername}
+import com.typesafe.sbt.packager.docker.{Cmd, DockerPermissionStrategy}
+
 name := "cdsmon"
 
 version := "1.0"
 
-scalaVersion := "2.12.3"
+scalaVersion := "2.12.8"
 
 libraryDependencies ++= Seq( jdbc , cache , ws   , specs2 % Test )
 
@@ -21,10 +25,6 @@ libraryDependencies ++= Seq(
 // https://mvnrepository.com/artifact/commons-io/commons-io
 libraryDependencies += "commons-io" % "commons-io" % "2.5"
 
-libraryDependencies += "com.gu" %% "pan-domain-auth-core" % "0.7.1"
-
-// https://mvnrepository.com/artifact/com.gu/pan-domain-auth-play_2.11
-libraryDependencies += "com.gu" %% "pan-domain-auth-play_2-6" % "0.7.1"
 
 val jacksonVersion = "2.9.6"
 //update vulnerable jackson-databind
@@ -39,24 +39,33 @@ debianPackageDependencies := Seq("openjdk-8-jre-headless")
 serverLoading in Debian := Some(ServerLoader.Systemd)
 serviceAutostart in Debian := false
 
-lazy val `cdsmon` = (project in file(".")).enablePlugins(PlayScala, RiffRaffArtifact, JDebPackaging)
+lazy val `cdsmon` = (project in file(".")).enablePlugins(PlayScala, DockerPlugin, AshScriptPlugin)
   .settings(Defaults.coreDefaultSettings: _*)
   .settings(
     name in Universal := normalizedName.value,
     topLevelDirectory := Some(normalizedName.value),
-    riffRaffPackageName := "cds-logging",
-    riffRaffManifestProjectName := s"multimedia:cds-logging",
-    riffRaffBuildIdentifier :=  Option(System.getenv("BUILD_NUMBER")).getOrElse("DEV"),
-    riffRaffUploadArtifactBucket := Option("riffraff-artifact"),
-    riffRaffUploadManifestBucket := Option("riffraff-builds"),
-    riffRaffManifestBranch := Option(System.getenv("BRANCH_NAME")).getOrElse("unknown_branch"),
-
-    riffRaffPackageType := (packageBin in Debian).value,
 
     debianPackageDependencies := Seq("openjdk-8-jre-headless"),
-    maintainer := "Andyn Gallagher <andy.gallagher@guardian.co.uk>",
+    maintainer := "Andy Gallagher <andy.gallagher@guardian.co.uk>",
     packageSummary := "CDSMonitor (aka cds-logging)",
     packageDescription := """Simple monitoring interface for the Content Delivery System""",
+
+    dockerPermissionStrategy := DockerPermissionStrategy.Run,
+    daemonUserUid in Docker := None,
+    daemonUser in Docker := "daemon",
+    dockerUsername  := sys.props.get("docker.username"),
+    dockerRepository := Some("guardianmultimedia"),
+    packageName in Docker := "guardianmultimedia/cdsmon",
+    packageName := "cdsmon",
+    dockerBaseImage := "openjdk:8-jdk-alpine",
+    dockerAlias := docker.DockerAlias(None, Some("guardianmultimedia"),"cdsmon",Some(sys.props.getOrElse("build.number","DEV"))),
+    dockerCommands ++= Seq(
+      Cmd("USER","root"), //fix the permissions in the built docker image
+      Cmd("RUN", "chown daemon /opt/docker"),
+      Cmd("RUN", "chmod u+w /opt/docker"),
+      Cmd("RUN", "chmod -R a+x /opt/docker"),
+      Cmd("USER", "daemon")
+    ),
 
     javaOptions in Universal ++= Seq(
       "-Dpidfile.path=/dev/null"

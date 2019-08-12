@@ -1,21 +1,20 @@
 package controllers
 
+import javax.inject.{Inject, Singleton}
 import play.api.mvc._
+
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
-object Login extends Controller with PanDomainAuthActions {
-
-  def oauthCallback = Action.async { implicit request =>
-    processGoogleCallback()
-  }
+@Singleton
+class Login @Inject() (cc:ControllerComponents) extends AbstractController(cc)  {
 
   def logout = Action.async { implicit request =>
-    Future(processLogout)
+    Future(Ok(""))
   }
 
-  def loginStatus = AuthAction { request =>
-    val user = request.user
-    Ok(views.html.loginStatus(user.toJson))
+  def loginStatus = Action { request =>
+    //val user = request.user
+    Ok(views.html.loginStatus("test"))
   }
 }

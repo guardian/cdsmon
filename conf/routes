@@ -3,9 +3,8 @@
 # ~~~~
 
 #Login stuff
-POST    /oauthCallback             controllers.Login.oauthCallback
-GET     /logout                    controllers.Login.logout
-GET     /loginstatus               controllers.Login.loginStatus
+GET     /logout                    @controllers.Login.logout
+GET     /loginstatus               @controllers.Login.loginStatus
 
 # Job API
 GET     /jobs/:internalid/metadata  @controllers.Jobs.metadata(internalid)
@@ -20,5 +19,5 @@ GET     /logapi/:externalid         @controllers.LogApi.logof(externalid)
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
 
-GET     /*path                      controllers.Application.mainview(path)
-GET     /                           controllers.Application.mainview_none
+GET     /*path                      @controllers.Application.mainview(path)
+GET     /                           @controllers.Application.mainview_none

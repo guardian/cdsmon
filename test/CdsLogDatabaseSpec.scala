@@ -14,7 +14,6 @@ import models.LogEntry
 import org.specs2.execute.{AsResult, ResultExecution, Success}
 import org.specs2.concurrent.ExecutionEnv
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.duration._
 

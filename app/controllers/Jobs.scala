@@ -2,7 +2,7 @@ package controllers
 
 import play.api.Configuration
 import play.api.mvc._
-import com.google.inject.{Inject,Singleton}
+import javax.inject.{Inject,Singleton}
 import models.{CdsJob, CdsModel}
 import org.joda.time.DateTime
 import io.circe._
@@ -18,7 +18,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
   * Created by localhome on 10/04/2017.
   */
 @Singleton
-class Jobs @Inject() (configuration: Configuration, db:CdsLogDatabase) extends Controller {
+class Jobs @Inject() (configuration: Configuration, db:CdsLogDatabase,cc:ControllerComponents) extends AbstractController(cc) {
   //implicit val CdsJobEncoder:Encoder[CdsJob] = Encoder[CdsJob]
   private final val logger = Logger.of(this.getClass)
 
