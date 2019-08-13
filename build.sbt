@@ -13,6 +13,9 @@ libraryDependencies ++= Seq( jdbc  , ws , guice , specs2 % Test )
 resolvers += "scalaz-bintray" at "https://dl.bintray.com/scalaz/releases"
 
 libraryDependencies += "mysql" % "mysql-connector-java" % "5.1.42"
+// https://mvnrepository.com/artifact/org.postgresql/postgresql
+libraryDependencies += "org.postgresql" % "postgresql" % "42.2.5"
+
 
 val circeVersion = "0.9.3"
 
@@ -55,6 +58,7 @@ lazy val `cdsmon` = (project in file(".")).enablePlugins(PlayScala, DockerPlugin
     daemonUser in Docker := "daemon",
     dockerUsername  := sys.props.get("docker.username"),
     dockerRepository := Some("guardianmultimedia"),
+    dockerExposedPorts ++= Seq(9000, 9001),
     packageName in Docker := "guardianmultimedia/cdsmon",
     packageName := "cdsmon",
     dockerBaseImage := "openjdk:8-jdk-alpine",

@@ -8,16 +8,15 @@ import javax.inject.{Inject, Singleton}
 import play.api.Configuration
 import play.Logger
 import java.sql.{Connection, DriverManager, ResultSet}
+import java.time.{LocalDateTime, ZoneId, ZonedDateTime}
+import java.time.format.DateTimeFormatter
 import java.util.UUID
 
 import org.apache.commons.io.IOUtils
 
 import scala.concurrent.Future
-import org.joda.time.DateTime
-import org.joda.time.format.{DateTimeFormatter, ISODateTimeFormat}
-
 import scala.concurrent.ExecutionContext.Implicits.global
-import org.joda.time.format.DateTimeFormat
+import scala.util.{Failure, Success, Try}
 
 /**
   * Created by localhome on 10/04/2017.
@@ -26,17 +25,38 @@ import org.joda.time.format.DateTimeFormat
 class CdsLogDatabase @Inject() (configuration: Configuration) {
   private final val logger = Logger.of(this.getClass)
 
+//  private val possibleParsers:Seq[DateTimeFormatter] = Seq(
+//    DateTimeFormat.forPattern("YYYY-MM-dd HH:mm:ss.S"),
+//    DateTimeFormat.forPattern("YYYY-MM-DD HH:mm:ss.SZ")
+//  )
+
+  implicit def stringToTime(str:String):ZonedDateTime = {
+    val local = LocalDateTime.parse(str, DateTimeFormatter.ofPattern("yyyy-MM-dd' 'HH:mm:ss[.SSSSSS][ZZ][+00]"))
+    ZonedDateTime.of(local, ZoneId.of("UTC"))
+//    val results = possibleParsers.map(parser=>Try {parser.parseDateTime(str)})
+//
+//    val successes = results.collect({case Success(time)=>time})
+//    val failures = results.collect({case Failure(err)=>err})
+//    failures.foreach(err=>println(err.getMessage))
+//    if(successes.nonEmpty){
+//      successes.head
+//    } else {
+//      throw new RuntimeException(s"No time formats matched $str")
+//    }
+  }
+
   def getConnection:Option[Connection] =
     try {
+      println(s"Connecting to ${configuration.get[String]("JDBC_URL")} as ${configuration.get[String]("DB_User")}")
       Some(DriverManager.getConnection(
-        configuration.getString("JDBC_URL").get,
-        configuration.getString("DB_User").get,
-        configuration.getString("DB_Password").get
+        configuration.get[String]("JDBC_URL"),
+        configuration.get[String]("DB_User"),
+        configuration.get[String]("DB_Password")
       )
       )
     } catch {
       case e:Exception=>
-        logger.error(e.getMessage)
+        logger.error("Could not connect to database: ", e)
         None
     }
 
@@ -152,7 +172,6 @@ class CdsLogDatabase @Inject() (configuration: Configuration) {
     val resultSet = stmt.executeQuery()
     def iterateResultList(resultSet: ResultSet,accumulatingList:List[LogEntry]):List[LogEntry] = {
       if(!resultSet.next()) return accumulatingList
-      val parser:DateTimeFormatter = DateTimeFormat.forPattern("YYYY-MM-dd HH:mm:ss.S")
 
       logger.error(resultSet.getString(4))
       iterateResultList(resultSet,
@@ -161,7 +180,7 @@ class CdsLogDatabase @Inject() (configuration: Configuration) {
           resultSet.getInt(3),
           resultSet.getString(4),
           resultSet.getString(5),
-          parser.parseDateTime(resultSet.getString(6))
+          resultSet.getString(6), //uses the implicit converter
         ) :: accumulatingList
       )
     }
@@ -189,7 +208,6 @@ class CdsLogDatabase @Inject() (configuration: Configuration) {
 
     def iterateResultList(resultSet:ResultSet,accumulatingList:List[CdsJob]):List[CdsJob] = {
       if(!resultSet.next()) return accumulatingList
-      val  parser:DateTimeFormatter   = DateTimeFormat.forPattern("YYYY-MM-dd HH:mm:ss.S")
       val length = accumulatingList.length
 
       //now .next() has been called, ResultSet should be updated...
@@ -197,7 +215,7 @@ class CdsLogDatabase @Inject() (configuration: Configuration) {
         CdsJob(
           resultSet.getInt(1),
           uuidFromStream(resultSet.getBinaryStream(2)),
-          parser.parseDateTime(resultSet.getString(3)), //DateTime
+          resultSet.getString(3), //uses the implicit converter
           resultSet.getString(4),
           optionalString(resultSet.getString(5)),
           optionalString(resultSet.getString(6)),

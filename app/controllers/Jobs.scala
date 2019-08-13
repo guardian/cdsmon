@@ -26,7 +26,7 @@ class Jobs @Inject() (configuration: Configuration, db:CdsLogDatabase,cc:Control
     case CdsJob(internalId,externalId,created,routeName,status,hostname,hostip) => Json.obj(
       "internalId"   -> internalId.toString.asJson,
       "externalId" -> externalId.asJson,
-      "created"      -> ISODateTimeFormat.dateTimeNoMillis().print(created).asJson,
+      "created"      -> created.toInstant.getEpochSecond.asJson,
       "routeName"->routeName.asJson,
       "status"->status.asJson,
       "hostname"->hostname.asJson,

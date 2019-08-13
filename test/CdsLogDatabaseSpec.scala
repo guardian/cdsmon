@@ -1,6 +1,7 @@
+import java.time.{ZoneId, ZonedDateTime}
+
 import com.google.inject.Inject
 import models.CdsJobStatus
-import org.joda.time.DateTime
 import org.junit.runner._
 import org.specs2.mutable._
 import org.specs2.runner._
@@ -19,11 +20,6 @@ import scala.concurrent.duration._
 
 @RunWith(classOf[JUnitRunner])
 class CdsLogDatabaseSpec (implicit ee: ExecutionEnv) extends Specification {
-  // allows us to use Unit returns in test cases
-//  implicit def unitAsResult: AsResult[Unit] = new AsResult[Unit] {
-//    def asResult(r: =>Unit) =
-//      ResultExecution.execute(r)(_ => Success())
-//  }
 
   "CdsLogDatabase" should {
     "lift log content" in new WithApplication {
@@ -38,7 +34,7 @@ class CdsLogDatabaseSpec (implicit ee: ExecutionEnv) extends Specification {
         result.head.methodName must be equalTo "Datastore"
         result.head.id must be equalTo 604550622
         result.head.status must be equalTo 4
-        result.head.timeStamp must be equalTo DateTime.parse("2017-06-07T16:25:01.000+01:00")
+        result.head.timeStamp must be equalTo ZonedDateTime.parse("2017-06-07T16:25:01.000+01:00")
 
       } await(1,2.seconds)
     }
@@ -53,6 +49,14 @@ class CdsLogDatabaseSpec (implicit ee: ExecutionEnv) extends Specification {
 
         content.routeStatus must be equalTo "something"
       } await(1,2.seconds)
+    }
+  }
+
+  "CdsLogDatabase.stringToTime" should {
+    "not fail on longer timestamps" in {
+      val db = new CdsLogDatabase(Configuration.empty)
+
+      db.stringToTime("2019-08-11 18:00:02.472249+00") mustEqual ZonedDateTime.of(2019,8,11,18,0,2,472249000,ZoneId.of("UTC"))
     }
   }
 }

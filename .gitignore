@@ -18,3 +18,4 @@ dist
 /frontend/node_modules/
 /public/javascripts/bundle.js
 /node_modules/
+/kubereal/

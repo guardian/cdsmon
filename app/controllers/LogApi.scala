@@ -30,7 +30,7 @@ class LogApi @Inject() (configuration: Configuration, db:CdsLogDatabase,cc:Contr
       "status" -> status.asJson,
       "methodName" -> methodName.asJson,
       "message" -> message.asJson,
-      "timestamp" -> ISODateTimeFormat.dateTimeNoMillis().print(timeStamp).asJson
+      "timestamp" -> timeStamp.toInstant.getEpochSecond.asJson
     )
   }
 
